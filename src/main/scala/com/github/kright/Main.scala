@@ -26,7 +26,7 @@ object Main {
     val cubes = 
       for 
         i <- -1 to 1; 
-        j <- -1 until 5; 
+        j <- -1 to 5; 
         pos = Vector(0.1 + i * 0.3, -0.3, 1.0 + j * 0.3)
         cube = Cube(pos, 0.1)
         sphere = Sphere(pos, 0.1)
@@ -63,9 +63,10 @@ object Main {
     val lens = Model(Sphere(Vector(0, 0, 1), 0.2), FresnelShlick(0.04, Mirror(Color(0.95, 0.95, 0.95)), reftaction))
     val innerLens = Model(InvertedSDF(lens.sdf), FresnelShlick(0.04, Mirror(Color(0.95, 0.95, 0.95)), refractionInverted))
     
-    val models = cubes ++ skyAndGround ++ scene
+//    val models = cubes ++ skyAndGround ++ scene
+    val models = cubes ++ skyAndGround :+ lens 
     
-    val div = 1
+    val div = 2
     val screenSize = ScreenSize(800 / div, 600 / div)
     val camera = Camera(1.0, screenSize.height.toDouble / screenSize.width.toDouble)
     val msaaGenerator = MSAAGenerator(camera, MSAAGenerator.random(128 / div))
@@ -79,7 +80,7 @@ object Main {
     reftaction.innerRaytracer = innerRaytracer
     refractionInverted.innerRaytracer = raytracer
     
-    val pic = raytracer.renderMultithread(msaaGenerator, screenSize, 4)
+    val pic = raytracer.renderMultithread(msaaGenerator, screenSize, threadsCount = 4)
     
     val finish = System.nanoTime()
     println(s"finished, dt = ${(finish - start).toString.reverse.grouped(3).mkString("_").reverse}ns")
